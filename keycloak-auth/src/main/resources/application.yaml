@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: keycloak-auth
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: food-ordering-client
+            client-secret: SE5hCLwZAVqls5r8nFbpw025Tsz5XSI4
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8088/realms/food-ordering-realm
+server:
+  port: 8082
