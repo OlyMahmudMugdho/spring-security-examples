@@ -8,16 +8,14 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @Controller
 public class FoodOrderingController {
 
-    private final WebClient webClient;
+    private final AuthService authService;
 
-    public FoodOrderingController(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8088").build();
+    public FoodOrderingController(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping("/")
@@ -42,28 +40,8 @@ public class FoodOrderingController {
         request.logout();
 
         if (user != null) {
-            // Extract ID token
-            String idToken = user.getIdToken().getTokenValue();
-
-            // Hardcoded Keycloak logout URL and redirect URI
-            String keycloakLogoutUrl = "/realms/food-ordering-realm/protocol/openid-connect/logout";
-            String redirectUri = "http://localhost:8082";
-
-            // Call Keycloak logout endpoint in the background
-            webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path(keycloakLogoutUrl)
-                            .queryParam("id_token_hint", idToken)
-                            .queryParam("post_logout_redirect_uri", redirectUri)
-                            .build())
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .onErrorResume(e -> {
-                        // Handle any errors during logout request
-                        System.err.println("Error during logout: " + e.getMessage());
-                        return Mono.empty();
-                    })
-                    .subscribe(); // Trigger request asynchronously
+            // performs keycloak logout
+            authService.logout(user);
         }
 
         // Redirect user to application home
