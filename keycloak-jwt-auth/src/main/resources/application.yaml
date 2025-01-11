@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: keycloak-jwt-auth
+  security:
+    oauth2:
+    # token can be got from http://localhost:8088/realms/realm-name-here/protocol/openid-connect/token
+    # please read the readme.md file
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8088/realms/spring-boot-app
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+#jwt:
+#  auth:
+#    converter:
+#      resource-id: spring-security
+#      principle-attribute: preferred_username
