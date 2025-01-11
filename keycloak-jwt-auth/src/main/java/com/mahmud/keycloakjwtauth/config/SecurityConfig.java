@@ -17,8 +17,11 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
     private JwtAuthConverter jwtAuthConverter;
+
+    public SecurityConfig(@Autowired JwtAuthConverter jwtAuthConverter) {
+        this.jwtAuthConverter = jwtAuthConverter;
+    }
 
 
     @Bean
