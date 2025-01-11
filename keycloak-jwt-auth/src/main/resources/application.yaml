@@ -14,4 +14,4 @@ jwt:
   auth:
     converter:
       resource-id: spring-security
-#      principle-attribute: preferred_username
+      principle-attribute: preferred_username

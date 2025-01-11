@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
@@ -22,9 +23,14 @@ import org.springframework.stereotype.Service;
 public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     private final String resourceId;
+    private final String principleAttribute;
 
-    public JwtAuthConverter(@Value("${jwt.auth.converter.resource-id}") String resourceId) {
+    public JwtAuthConverter(
+            @Value("${jwt.auth.converter.resource-id}") String resourceId,
+            @Value("${jwt.auth.converter.principle-attribute}") String principleAttribute
+    ) {
         this.resourceId = resourceId;
+        this.principleAttribute = principleAttribute;
     }
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -56,7 +62,12 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
                 roles.addAll((Collection<? extends String>) demoAccess.get("roles"));
             }
         }
+
+        // Debugging resource id
         System.out.println("Resolved resourceId: " + resourceId);
+
+        // Debugging principle attribute
+        System.out.println("Principle attribute: " + principleAttribute + "=" + getPrincipleClaimName(jwt));
 
         // Debugging extracted roles
         System.out.println("Extracted roles: " + roles);
@@ -64,6 +75,18 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                 .collect(Collectors.toSet());
+    }
+
+
+
+    //  extended functions
+
+    private String getPrincipleClaimName(Jwt jwt) {
+        String claimName = JwtClaimNames.SUB;
+        if (principleAttribute != null) {
+            claimName = principleAttribute;
+        }
+        return jwt.getClaim(claimName);
     }
 
 
