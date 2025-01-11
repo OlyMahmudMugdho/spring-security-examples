@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,8 +16,16 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
-@Component
+import org.springframework.stereotype.Service;
+
+@Service
 public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    private final String resourceId;
+
+    public JwtAuthConverter(@Value("${jwt.auth.converter.resource-id}") String resourceId) {
+        this.resourceId = resourceId;
+    }
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
@@ -41,12 +50,13 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
 
         // Extract roles from resource_access.demo
         Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
-        if (resourceAccess != null && resourceAccess.containsKey("spring-security")) {
-            Map<String, Object> demoAccess = (Map<String, Object>) resourceAccess.get("spring-security");
+        if (resourceAccess != null && resourceAccess.containsKey(resourceId)) {
+            Map<String, Object> demoAccess = (Map<String, Object>) resourceAccess.get(resourceId);
             if (demoAccess != null && demoAccess.containsKey("roles")) {
                 roles.addAll((Collection<? extends String>) demoAccess.get("roles"));
             }
         }
+        System.out.println("Resolved resourceId: " + resourceId);
 
         // Debugging extracted roles
         System.out.println("Extracted roles: " + roles);

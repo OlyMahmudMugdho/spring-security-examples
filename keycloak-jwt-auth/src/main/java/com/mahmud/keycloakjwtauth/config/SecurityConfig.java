@@ -2,6 +2,7 @@ package com.mahmud.keycloakjwtauth.config;
 
 import com.mahmud.keycloakjwtauth.converter.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -16,8 +17,8 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 public class SecurityConfig {
 
-
-    private final JwtAuthConverter jwtAuthConverter = new JwtAuthConverter();
+    @Autowired
+    private JwtAuthConverter jwtAuthConverter;
 
 
     @Bean
